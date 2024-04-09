@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;do_an_tot_nghiep/Core/Inc/decode_frame&apos; to &apos;decode_frame.h&apos;" description="Rename resource &apos;decode_frame&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Core/Inc/decode_frame" name="decode_frame.h" stamp="1711887919484" updateReferences="true"/>
+</session>

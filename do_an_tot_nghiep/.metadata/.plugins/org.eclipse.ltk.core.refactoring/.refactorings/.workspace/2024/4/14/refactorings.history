@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Delete resource &apos;do_an_tot_nghiep/Core/Inc/pid_module.c&apos;" deleteContents="false" description="Delete resource &apos;do_an_tot_nghiep/Core/Inc/pid_module.c&apos;" element1="/do_an_tot_nghiep/Core/Inc/pid_module.c" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1711945029072"/>
+</session>

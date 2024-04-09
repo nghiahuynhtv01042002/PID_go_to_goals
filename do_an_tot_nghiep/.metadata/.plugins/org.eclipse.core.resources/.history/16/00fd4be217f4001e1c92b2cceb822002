@@ -1,0 +1,25 @@
+/*
+ * pid_module.c
+ *
+ *  Created on: Apr 1, 2024
+ *      Author: Nghia
+ */
+#include "pid_module.h"
+
+void pid_set_Kp_Ki_Kd(PID_handleTypedef* hpid,float Kp,float Ki,float Kd){
+    hpid->Kp = Kp;
+    hpid->Ki = Ki;
+    hpid->Kd = Kd;
+}
+
+float calculat_pid_output(PID_handleTypedef* hpid){
+    hpid->error = (hpid->setpoint -hpid->current);//degree
+    hpid->integral += hpid->error;
+    hpid->derivative = hpid->error - hpid->pre_error;
+    float ouput_pid = hpid->Kp*hpid->error + hpid->Ki*hpid->integral + hpid->Kd*hpid->derivative;
+    hpid->pre_error = hpid->error;
+    return ouput_pid*3.14/180;//rad/s
+}
+
+
+
