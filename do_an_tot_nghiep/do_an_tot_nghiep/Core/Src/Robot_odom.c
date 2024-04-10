@@ -13,7 +13,7 @@
 void init_Robot(Robot* robot){
     robot->x = 0;
     robot->y = 0;
-    robot->phi = 0;
+    robot->theta = 0;
     robot->omega = 0;
     robot->v = 0.0;//60rpm = 0.2041 50 = 0.17
     robot->v_r = 0;
@@ -23,6 +23,7 @@ void init_Robot(Robot* robot){
     robot->v_r_PWM = 0;
     robot->v_l_PWM = 0;
     robot->S_distance = 0;
+    strcpy(robot->cmd,"STP");
 
 }
 /// @brief calculat new posstion of Robot from encoder value
@@ -34,11 +35,11 @@ void update_Position(Robot* robot, int encoder_difference_left, int encoder_diff
 		float D_l = (float) pi*d*(encoder_difference_left)/N;
 		float D_c = (D_r + D_l)/2;
 
-      robot->x += D_c*cos(robot->phi);
-      robot->y += D_c*sin(robot->phi);
-      robot->phi += (D_r -D_l)/(L);
+      robot->x += D_c*cos(robot->theta);
+      robot->y += D_c*sin(robot->theta);
+      robot->theta += (D_r -D_l)/(L);
 
-      robot->phi = atan2(sin(robot->phi),cos(robot->phi)) ;
+      robot->theta = atan2(sin(robot->theta),cos(robot->theta)) ;
 //      if (robot->phi > 2 * pi) robot->phi -= 2 * pi;
 //      else if (robot->phi < 0) robot->phi += 2 * pi;
 }
@@ -51,11 +52,16 @@ void update_Position_base_velocity(Robot* robot, int encoder_difference_left, in
 	robot->S_distance = (D_r + D_l)/2;
 //	robot->x += D_c*cos(robot->phi);
 //	robot->y += D_c*sin(robot->phi);
-	robot->x += robot->v * cos(robot->phi)*delta_t;
-	robot->y +=	robot->v *sin(robot->phi)*delta_t;
-
-	robot->phi += robot->omega*delta_t;
-	robot->phi = atan2(sin(robot->phi),cos(robot->phi)) ;
+	robot->x += robot->v * cos(robot->theta)*delta_t;
+	robot->y +=	robot->v *sin(robot->theta)*delta_t;
+//	if(strcmp(robot->cmd,"RUN") ==0){
+//		robot->theta += robot->omega*delta_t;
+//	}
+//	else{
+//		robot->theta +=pi;
+//	}
+	robot->theta += robot->omega*delta_t;
+	robot->theta= atan2(sin(robot->theta),cos(robot->theta)) ;
 }
 
 
@@ -71,7 +77,7 @@ float get_Y(Robot* robot){
     return robot->y;
 }
 float get_Phi(Robot* robot){
-    return robot->phi;
+    return robot->theta;
 }
 float get_Vr(Robot* robot){
     return robot->v_r;
@@ -89,28 +95,4 @@ float get_Omega(Robot* robot){
 /// @brief setter
 /// @param robot
 
-void set_X(Robot* robot,float x_New ){
-    robot->x = x_New;
-}
-void set_Y(Robot* robot,float y_New ){
-    robot->y = y_New;
-}
-void set_Phi(Robot* robot,float phi_New){
-    robot->phi = phi_New;
-}
-void set_Omega(Robot* robot,float omega_New){
-    robot->omega = omega_New;
-}
-void set_Vr(Robot* robot,float vr_New){
-    robot->v_r = vr_New;
-}
-void set_vl(Robot* robot,float vl_New){
-    robot->v_l = vl_New;
-}
-void set_Vr_VL(Robot* robot ,float vr_New,float vl_New){
-    robot->v_r = vr_New;
-    robot->v_l = vl_New;
-}
-void set_V(Robot* robot ,float v_New){
-    robot->v = v_New;
-}
+

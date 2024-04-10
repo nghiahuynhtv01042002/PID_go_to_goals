@@ -128,19 +128,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			pre_encoder_value_right = encoder_value_right ;
 			pre_encoder_value_left = encoder_value_left ;
 
-//			update_Position(&myRobot, encoder_difference_left, encoder_difference_right);
-			update_Position_base_velocity(&myRobot, encoder_difference_left, encoder_difference_right,0.1);
+			//update_Position(&myRobot, encoder_difference_left, encoder_difference_right);
+			update_Position_base_velocity(&myRobot, encoder_difference_left, encoder_difference_right,0.1);//delta time is 0.1
+			//ennable PID calculation
 			en_PID =1;
 
 			//end condition
 			distance_to_goals =sqrt((myRobot.x-my_desired_point.x_d)*(myRobot.x - my_desired_point.x_d)+(myRobot.y - my_desired_point.y_d)*(myRobot.y-my_desired_point.y_d));
-	//			sprintf(data,"!distance:%.2f#\n",distance_to_goals);
-	//			HAL_UART_Transmit_DMA(&huart2, (uint8_t*)data,strlen(data));
-			if((distance_to_goals < 0.01 ) || ((myRobot.x >= my_desired_point.x_d -0.04) &(myRobot.y >= my_desired_point.y_d -0.04))){
+			//sprintf(data,"!distance:%.2f#\n",distance_to_goals);
+			//HAL_UART_Transmit_DMA(&huart2, (uint8_t*)data,strlen(data));
+			if((distance_to_goals < 0.01 ) || ((myRobot.x >= my_desired_point.x_d -0.01) &(myRobot.y >= my_desired_point.y_d -0.01))){
 				HAL_GPIO_WritePin(PE10_EN_DRIVER_GPIO_Port,PE10_EN_DRIVER_Pin,RESET);
 				en_run = 0;
 			}
-//			return encoder value
+			//return encoder value
 //			sprintf(data,"!enc_L:%d#encR:%d#\n",encoder_value_left,encoder_value_right);
 //			HAL_UART_Transmit_DMA(&huart2, (uint8_t*)data,strlen(data));
 
@@ -149,16 +150,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 //			HAL_UART_Transmit_DMA(&huart2, (uint8_t*)data,strlen(data));
 
 			//return x y phi; !cmd:RUN#x:0.00#y:0.00#phi:0.00#
-			sprintf(data,"!cmd:RUN#x:%.2f#y:%.2f#phi:%.2f#\n",myRobot.x,myRobot.y,rad_to_degree(myRobot.phi));
+			sprintf(data,"!cmd:%s#x:%.2f#y:%.2f#phi:%.2f#\n",myRobot.cmd,myRobot.x,myRobot.y,rad_to_degree(myRobot.theta));
 			HAL_UART_Transmit_DMA(&huart2, (uint8_t*)data,strlen(data));
 
-			//return W_L_mps
-//			sprintf(data,"!W_L_mps:%.2f#W_R_mps:%.2f#\n",myRobot.v_l,myRobot.v_r);
-//			HAL_UART_Transmit_DMA(&huart2, (uint8_t*)data,strlen(data));
-
-//		  	//return wl_wr;
-//			sprintf(data,"!W_L:%.2f#W_R:%.2f#\n",myRobot.v_l_rpm,myRobot.v_r_rpm);
-//			HAL_UART_Transmit_DMA(&huart2, (uint8_t*)data,strlen(data));
 			//return PWM
 //			sprintf(data,"!W_L_PWM:%.2f#W_R_PWM:%.2f#\n",myRobot.v_l_PWM,myRobot.v_r_PWM);
 //			HAL_UART_Transmit_DMA(&huart2, (uint8_t*)data,strlen(data));
@@ -217,8 +211,9 @@ int main(void)
   init_Robot(&myRobot);
   desired_point_init(&my_desired_point);
   HAL_UART_Receive_IT(&huart2, &Rx, 1);
+  //ref KP KI KD
   pid_set_Kp_Ki_Kd(&hpid, 1.56, 0.055, 0.025,0.1);
-//  pid_set_Kp_Ki_Kd(&hpid, 1.005, 0.3, 0.002,0.2);
+//  pid_set_Kp_Ki_Kd(&hpid, 1.005, 0.3, 0.002,0.1);
   //start PWM TIM1; chanel 1,2 for left motor ; chanel 3,4 for right  motor
   //chanel 1 PE9 ;chanel 2 PE11; chanel 3 PE23 ; chanel 4 PE14;
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
@@ -251,6 +246,7 @@ int main(void)
 		  split_frame((char*)uart_buff, &my_desired_point);
 
 		  if(strcmp(my_desired_point.cmd_d, "RUN") == 0){
+			  strcpy(myRobot.cmd,my_desired_point.cmd_d);
 			  HAL_GPIO_WritePin(PE10_EN_DRIVER_GPIO_Port,PE10_EN_DRIVER_Pin,SET);
 			  en_run = 1;
 		  }
@@ -260,7 +256,6 @@ int main(void)
 		  }
 //		  HAL_UART_Transmit_DMA(&huart2, uart_buff, sizeof(uart_buff));
 //		  HAL_Delay(100);
-
 
 		  //send data to check desire point: !cmd:RUN#x:0.00#y:0.00#phi:0.00#
 //		  sprintf(data,"!cmd_d:%s#x_d:%.2f#y_d:%.2f#phi_d:%.2f#\n",my_desired_point.cmd_d,my_desired_point.x_d,my_desired_point.y_d,my_desired_point.phi_d);
@@ -273,19 +268,16 @@ int main(void)
 	  	  if(en_PID ==1){
 		  	  // cal phi desired (rad/s)
 			  phid_pid = atan2((my_desired_point.y_d - myRobot.y),(my_desired_point.x_d - myRobot.x));
-	//
-	//		  	  hpid.setpoint = rad_to_degree(phid_pid);//degree
-	//		  	  hpid.current = rad_to_degree(myRobot.phi) ;//degree
 			  hpid.setpoint = phid_pid;
-			  hpid.current = myRobot.phi;
+			  hpid.current = myRobot.theta;
 		  	  //calculate output PID
 		  	  myRobot.omega = calculate_pid_output(&hpid);//rad/s
 
-	//	  	  //calspeed : write a function in pid_module to call angular vel of 2 motor anf convert it to PWM signal
+		  	  //calspeed : write a function in pid_module to call angular vel of 2 motor anf convert it to PWM signal
 		  	  myRobot.v_r = cal_speed_right_motor(myRobot.omega, myRobot.v);// m/s
 		  	  myRobot.v_l = cal_speed_left_motor(myRobot.omega, myRobot.v);//m/s
 
-	//	  	  limint vr vl
+		  	  //limint vr vl
 
 		  	  if(abs(myRobot.v_r) > v_max){
 		  		  if(myRobot.v_r >= 0 )
@@ -313,15 +305,6 @@ int main(void)
 		  			  myRobot.v_l = (float)-v_min ;
 		  	  }
 
-
-	//	  	  //convert to rpm then convert to pwm
-	//	  	  myRobot.v_r_rpm = mps_to_rpm(myRobot.v_r); // rpm
-	//	  	  myRobot.v_l_rpm = mps_to_rpm( myRobot.v_l);// rpm
-	//	  	  //return wl_wr-rpm;
-	//
-	//	  	  myRobot.v_r_PWM = rpm_to_pwm(myRobot.v_r_rpm);//pwm
-	//	  	  myRobot.v_l_PWM = rpm_to_pwm(myRobot.v_l_rpm);//pwm
-
 		  	  // limit max min PWM for motor
 		  	  myRobot.v_l_PWM = mps_to_PWM(myRobot.v_l);
 		  	  myRobot.v_r_PWM = mps_to_PWM(myRobot.v_r );
@@ -331,8 +314,6 @@ int main(void)
 
 		  // PWM cho 2 motor
 		  if(en_run == 1){
-
-
 			  //left motor
 			  // clockwise
 //			  if(myRobot.v_l_PWM > 0){
@@ -344,7 +325,6 @@ int main(void)
 //				  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,0);//
 //				  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,(int)-myRobot.v_l_PWM);
 //			  }
-//
 //			  //right motor
 //			  // clockwise
 //			  if(myRobot.v_r_PWM > 0){
@@ -356,7 +336,7 @@ int main(void)
 //				  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,0);//
 //				  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4,(int)-1*myRobot.v_r_PWM);
 //			  }
-
+			  //this make my PID come true , i dont know why we use the code above but it didnt work
 			  //left motor
 			  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,abs(myRobot.v_l_PWM));//
 			  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,0);
@@ -366,6 +346,7 @@ int main(void)
 
 		  }
 		  else{
+			  strcpy(myRobot.cmd,"STP");
 			  //left motor
 			  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,0);//
 			  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,0);

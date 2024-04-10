@@ -25,7 +25,7 @@
 typedef struct {
     float x;
     float y;
-    float phi;
+    float theta;
 
     float v;
     float v_l;
@@ -52,14 +52,7 @@ float get_Vl(Robot* robot);
 float get_V(Robot* robot);
 float get_Omega(Robot* robot);
 
-void set_X(Robot* robot,float x_New );
-void set_Y(Robot* robot,float y_New );
-void set_Phi(Robot* robot,float phi_New);
-void set_Omega(Robot* robot,float omega_New);
-void set_Vr(Robot* robot,float vr_New);
-void set_vl(Robot* robot,float vl_New);
-void set_Vr_VL(Robot* robot ,float vr_New,float vl_New);
-void set_V(Robot* robot ,float v_New);
+
 
 
 #endif /* INC_ROBOT_ODOM_H_ */
