@@ -21,7 +21,7 @@
 #define PWM_min 350
 
 #define v_max 0.2
-#define v_min 0.12
+#define v_min 0.1
 typedef struct {
     float x;
     float y;
@@ -42,7 +42,7 @@ typedef struct {
 }Robot;
 
 void init_Robot(Robot* robot);
-void update_Position(Robot* robot, int encoder_difference_left, int encoder_difference_right);
+void update_Position(Robot* robot, int encoder_difference_left, int encoder_difference_right,float delta_t);
 void update_Position_base_velocity(Robot* robot, int encoder_difference_left, int encoder_difference_right,float delta_t);
 float get_X(Robot* robot);
 float get_Y(Robot* robot);

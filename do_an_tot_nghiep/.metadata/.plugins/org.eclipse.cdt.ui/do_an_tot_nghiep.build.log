@@ -1,10 +1,10 @@
-11:38:22 **** Incremental Build of configuration Debug for project do_an_tot_nghiep ****
+22:34:27 **** Incremental Build of configuration Debug for project do_an_tot_nghiep ****
 make -j8 all 
 arm-none-eabi-size  do_an_tot_nghiep.elf 
    text	   data	    bss	    dec	    hex	filename
-  53952	    496	   2680	  57128	   df28	do_an_tot_nghiep.elf
+  53888	    496	   2680	  57064	   dee8	do_an_tot_nghiep.elf
 Finished building: default.size.stdout
  
 
-11:38:22 Build Finished. 0 errors, 0 warnings. (took 251ms)
+22:34:27 Build Finished. 0 errors, 0 warnings. (took 246ms)
 
